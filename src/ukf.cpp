@@ -56,11 +56,16 @@ UKF::UKF() {
    * Hint: one or more values initialized above might be wildly off...
    */
   is_initialized_ = false;
-  n_x_ = 5;
-  n_aug_ = 7;
-  lambda_ = 3 - n_aug_;
+  n_x_ = 5;               // set state dimension
+  n_aug_ = 7;             // set augmented dimension
+  lambda_ = 3 - n_aug_;   // set lambda_
+
+  // set weights
+  weights_ = VectorXd(2*n_aug_+1);
   weights_.fill(0.5 / (lambda_+n_aug_));
   weights_(0) = lambda_ / (lambda_+n_aug_);
+
+  // Initialize sigma point matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
   Xsig_pred_.setZero();
 }
@@ -77,7 +82,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     time_us_ = meas_package.timestamp_;
 
     // first measurement
-    x_ << 0, 0, 1, 0, 0;
+    x_ << 0, 0, 0, 0, 0;
     if (meas_package.sensor_type_ == MeasurementPackage::LASER){
       x_(0) = meas_package.raw_measurements_[0];
       x_(1) = meas_package.raw_measurements_[1];
@@ -116,7 +121,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   }
   std::cout << "x_ = " << x_ << std::endl;
   std::cout << "P_ = " << P_ << std::endl;
-
 }
 
 void UKF::Prediction(double delta_t) {
@@ -287,7 +291,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   MatrixXd R = MatrixXd(3, 3);
   R << std_radr_ * std_radr_, 0, 0,
        0, std_radphi_ * std_radphi_, 0,
-       0, 0, std_radrd_ * std_radrd_, 0;
+       0, 0, std_radrd_ * std_radrd_;
   for (int i = 0; i < 2*n_aug_; i++){
     VectorXd z_diff = Zsig.col(i) - z_pred;
     while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
