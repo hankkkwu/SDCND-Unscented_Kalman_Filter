@@ -22,6 +22,11 @@ class Tools {
   Eigen::VectorXd CalculateRMSE(const std::vector<Eigen::VectorXd> &estimations,
                                 const std::vector<Eigen::VectorXd> &ground_truth);
 
+  /**
+   * A variable to store residual vaule.
+   */
+  Eigen::VectorXd total_residual;
+
 };
 
 #endif  // TOOLS_H_
