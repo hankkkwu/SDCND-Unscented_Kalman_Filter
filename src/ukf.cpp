@@ -67,7 +67,6 @@ UKF::UKF() {
 
   // Initialize sigma point matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
-  Xsig_pred_.setZero();
 }
 
 UKF::~UKF() {}
@@ -77,6 +76,13 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * TODO: Complete this function! Make sure you switch between lidar and radar
    * measurements.
    */
+  if (!use_laser_ && meas_package.sensor_type_ == MeasurementPackage::LASER) {
+    return;
+  }
+  if (!use_radar_ && meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+    return;
+  }
+
   if (!is_initialized_){
     // initializing time stamp
     time_us_ = meas_package.timestamp_;
@@ -113,10 +119,10 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   Prediction(delta_t);
 
   // Update
-  if (meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_){
+  if (meas_package.sensor_type_ == MeasurementPackage::LASER){
     UpdateLidar(meas_package);
   }
-  else if (meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_){
+  else if (meas_package.sensor_type_ == MeasurementPackage::RADAR){
     UpdateRadar(meas_package);
   }
   std::cout << "x_ = " << x_ << std::endl;
@@ -145,10 +151,8 @@ void UKF::Prediction(double delta_t) {
   // create augmented covariance matrix
   P_aug.setZero();
   P_aug.topLeftCorner(n_x_, n_x_) = P_;
-  MatrixXd Q = MatrixXd(2, 2);
-  Q << std_a_*std_a_, 0,
-       0, std_yawdd_*std_yawdd_;
-  P_aug.bottomRightCorner(2, 2) = Q;
+  P_aug(n_x_, n_x_) = std_a_*std_a_;
+  P_aug(n_x_+1, n_x_+1) = std_yawdd_*std_yawdd_;
 
   // create square root matrix
   MatrixXd A = P_aug.llt().matrixL();
@@ -197,7 +201,6 @@ void UKF::Prediction(double delta_t) {
     P_ += weights_(i) * x_diff * x_diff.transpose();
   }
 }
-
 
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
   /**
@@ -268,14 +271,12 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     double v = Xsig_pred_(2, i);
     double yaw = Xsig_pred_(3, i);
     double s = px * px + py * py;
-    if (s > 0.0001){
-      Zsig(0, i) = sqrt(s);
-      Zsig(1, i) = atan2(py, px);
-      Zsig(2, i) = (px * cos(yaw) * v + py * sin(yaw) * v) / sqrt(s);
+    if (s < 0.0001){
+      s = 0.0001;
     }
-    else{
-      std::cout << "Can't not divide by 0!!" << std::endl;
-    }
+    Zsig(0, i) = sqrt(s);
+    Zsig(1, i) = atan2(py, px);
+    Zsig(2, i) = (px * cos(yaw) * v + py * sin(yaw) * v) / sqrt(s);
   }
 
   // calculate mean predicted measurement
@@ -307,14 +308,14 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   for (int i = 0; i < 2*n_aug_+1; i++){
     VectorXd z_diff = Zsig.col(i) - z_pred;
     // angle normalization
-    while (z_diff(1)> M_PI) z_diff(1) -= 2.*M_PI;
-    while (z_diff(1)< -M_PI) z_diff(1) += 2.*M_PI;
+    while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
+    while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
 
     // state difference
     VectorXd x_diff = Xsig_pred_.col(i) - x_;
     // angle normalization
-    while (x_diff(3)> M_PI) x_diff(3) -= 2.*M_PI;
-    while (x_diff(3)< -M_PI) x_diff(3) += 2.*M_PI;
+    while (x_diff(3) > M_PI) x_diff(3) -= 2.*M_PI;
+    while (x_diff(3) < -M_PI) x_diff(3) += 2.*M_PI;
 
     Tc += weights_(i) * x_diff * z_diff.transpose();
   }
