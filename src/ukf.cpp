@@ -123,12 +123,12 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	// Update
 	if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
 		UpdateLidar(meas_package);
-		/*
-    if (myfileI.is_open()) {
+		std::ofstream myfileI ("lidar_output.txt", std::ios::app);
+		if (myfileI.is_open()) {
         myfileI << NIS_lidar_ << "\n";
+				myfileI.close();
     }
     else std::cout << "Unable to open file for writing";
-		*/
 	}
 	else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
 		UpdateRadar(meas_package);
@@ -271,7 +271,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	P_ = P_ - K * S * K.transpose();
 
 	// Normalized innovation Squared (NIS):
-	NIS_radar_ = (z - z_pred).transpose() * S_inverse * (z - z_pred);
+	NIS_lidar_ = (z - z_pred).transpose() * S_inverse * (z - z_pred);
 }
 
 
