@@ -95,6 +95,12 @@ public:
 
 	// Sigma point spreading parameter
 	double lambda_;
+
+	// Current NIS for radar
+	double NIS_radar_;
+
+	// Current NIS for lidar
+	double NIS_lidar_;
 };
 
 #endif  // UKF_H
