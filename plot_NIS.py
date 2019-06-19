@@ -16,10 +16,11 @@ for r in f2:
     radar_nis.append(float(r[:-2]))
     baseline_r.append(7.815)
 
+plt.title("NIS for radar")
 plt.plot(radar_nis, label="radar_nis")
 plt.plot(baseline_r, label="95%")
-# plt.plot(lidar_nis, label="radar_nis")
-# plt.plot(baseline_l, label="95%")
+#plt.plot(lidar_nis, label="ladar_nis")
+#plt.plot(baseline_l, label="95%")
 plt.legend()   # show lines name
 plt.xlim(0, 250)
 plt.ylim(0, 16)
