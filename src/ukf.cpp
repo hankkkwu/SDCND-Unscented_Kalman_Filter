@@ -1,6 +1,8 @@
 #include "ukf.h"
 #include "Eigen/Dense"
 #include <iostream>
+#include <fstream>
+#include <string>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -22,10 +24,10 @@ UKF::UKF() {
 	P_ = MatrixXd(5, 5);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
-	std_a_ = 30;
+	std_a_ = 0.6;
 
 	// Process noise standard deviation yaw acceleration in rad/s^2
-	std_yawdd_ = 30;
+	std_yawdd_ = 0.5;
 
 	/**
 	 * DO NOT MODIFY measurement noise values below.
@@ -121,12 +123,26 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	// Update
 	if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
 		UpdateLidar(meas_package);
+		/*
+    if (myfileI.is_open()) {
+        myfileI << NIS_lidar_ << "\n";
+    }
+    else std::cout << "Unable to open file for writing";
+		*/
 	}
 	else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
 		UpdateRadar(meas_package);
+		std::ofstream myfileI ("radar_output.txt", std::ios::app);
+		if (myfileI.is_open()) {
+        myfileI << NIS_radar_ << "\n";
+				myfileI.close();
+    }
+    else std::cout << "Unable to open file for writing";
 	}
+
 	std::cout << "x_ = " << x_ << std::endl;
 	std::cout << "P_ = " << P_ << std::endl;
+
 }
 
 void UKF::Prediction(double delta_t) {
@@ -246,12 +262,16 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 
 	// calculate Kalman gain K;
 	MatrixXd K = MatrixXd(5, 2);
-	K = Tc * S.inverse();
+	MatrixXd S_inverse = S.inverse();
+	K = Tc * S_inverse;
 
 	// update state mean and covariance matrix
 	VectorXd z = meas_package.raw_measurements_;
 	x_ = x_ + K * (z - z_pred);
 	P_ = P_ - K * S * K.transpose();
+
+	// Normalized innovation Squared (NIS):
+	NIS_radar_ = (z - z_pred).transpose() * S_inverse * (z - z_pred);
 }
 
 
@@ -322,7 +342,8 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
 	// calculate Kalman gain K;
 	MatrixXd K = MatrixXd(5, 3);
-	K = Tc * S.inverse();
+	MatrixXd S_inverse = S.inverse();
+	K = Tc * S_inverse;
 
 	// update state mean and covariance matrix
 	VectorXd z = meas_package.raw_measurements_;
@@ -331,4 +352,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
 	x_ = x_ + K * z_diff;
 	P_ = P_ - K * S * K.transpose();
+
+	// Normalized innovation Squared (NIS):
+	NIS_radar_ = z_diff.transpose() * S_inverse * z_diff;
 }
