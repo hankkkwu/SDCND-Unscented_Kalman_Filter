@@ -24,10 +24,10 @@ UKF::UKF() {
 	P_ = MatrixXd(5, 5);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
-	std_a_ = 0.6;
+	std_a_ = 0.2;
 
 	// Process noise standard deviation yaw acceleration in rad/s^2
-	std_yawdd_ = 0.5;
+	std_yawdd_ = 0.2;
 
 	/**
 	 * DO NOT MODIFY measurement noise values below.
@@ -90,24 +90,29 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 		time_us_ = meas_package.timestamp_;
 
 		// first measurement
-		x_ << 0, 0, 0, 0, 0;
+		x_ << 0, 0, 0, 0.3, 0.3;
 		if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
 			x_(0) = meas_package.raw_measurements_[0];
 			x_(1) = meas_package.raw_measurements_[1];
+			// initializing state covariance matrix P_
+			P_ << 0.1, 0, 0, 0, 0,
+						0, 0.1, 0, 0, 0,
+						0, 0, 1, 0, 0,
+						0, 0, 0, 1, 0,
+						0, 0, 0, 0, 1;
 		}
 		else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
 			double rho = meas_package.raw_measurements_[0];
 			double phi = meas_package.raw_measurements_[1];
 			x_(0) = rho * cos(phi);
 			x_(1) = rho * sin(phi);
+			// initializing state covariance matrix P_
+			P_ << 1, 0, 0, 0, 0,
+						0, 1, 0, 0, 0,
+						0, 0, 1, 0, 0,
+						0, 0, 0, 1, 0,
+						0, 0, 0, 0, 1;
 		}
-
-		// initializing state covariance matrix P_
-		P_ << 1, 0, 0, 0, 0,
-			0, 1, 0, 0, 0,
-			0, 0, 1, 0, 0,
-			0, 0, 0, 1, 0,
-			0, 0, 0, 0, 1;
 
 		// done initializing, no need to predict or update
 		is_initialized_ = true;
