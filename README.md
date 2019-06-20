@@ -21,7 +21,7 @@ Here's steps for Ubuntu BASH:
 6. `sudo apt install zlib1g-dev`
 7. `git clone https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter.git`
 8. `sudo rm /usr/lib/libuWS.so`
-9. navigate to SDCND-P5-Extended_Kalman_Filters
+9. navigate to SDCND-Unscented-Kalman-Filter-Project
 10. `./install-ubuntu.sh`
 11. at the top level of the project repository `mkdir build && cd build`
 12. from /build `cmake .. && make`
