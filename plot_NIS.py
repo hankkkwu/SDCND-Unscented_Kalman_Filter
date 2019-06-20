@@ -22,7 +22,7 @@ plt.plot(baseline_r, label="95%")
 #plt.plot(lidar_nis, label="ladar_nis")
 #plt.plot(baseline_l, label="95%")
 plt.legend()   # show lines name
-plt.xlim(0, 250)
+plt.xlim(0, 500)
 plt.ylim(0, 16)
 plt.ylabel("NIS")
 plt.show()
