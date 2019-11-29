@@ -1,7 +1,19 @@
 # Unscented Kalman Filter Project
 Self-Driving Car Engineer Nanodegree Program
 
-In this project I utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. You can find the project code in [src](https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter/tree/master/src) folder and [video](https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter/blob/master/UKF_video.mp4) of how my code works in the simulator. You can also find the pictures of consistency check (NIS) for [lidar](https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter/blob/master/lidar_NIS.png) and [radar](https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter/blob/master/lidar_NIS.png) measurements.
+In this project I utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. You can find the project code in [src](https://github.com/hankkkwu/SDCND-Unscented_Kalman_Filter/tree/master/src) folder.
+
+Here is how my code work in the simulator:
+
+[![result video](http://img.youtube.com/vi/zRvk7GxDQkQ/0.jpg)](https://www.youtube.com/watch?v=zRvk7GxDQkQ "UKF project")
+
+Consistency check (NIS) for lidar measurements: 
+
+![alt text](lidar_NIS.png)
+
+Consistency check (NIS) for radar measurements:
+
+![alt text](radar_NIS.png)
 
 
 ## Installation and environment set up for Windows 10 users
